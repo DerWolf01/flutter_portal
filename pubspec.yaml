@@ -8,10 +8,10 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
-  analyzer: 6.5.0
+  analyzer: 6.4.0
   build_runner: ^2.4.11
   http: ^1.2.2
-  reflectable: ^4.0.9
+  reflectable: ^4.0.0
   # path: ^1.8.0
 
 dev_dependencies:
