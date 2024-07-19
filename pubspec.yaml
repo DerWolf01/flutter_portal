@@ -8,7 +8,9 @@ environment:
 
 # Add regular dependencies here.
 dependencies:
+  build_runner: ^2.4.11
   http: ^1.2.2
+  reflectable: ^4.0.9
   # path: ^1.8.0
 
 dev_dependencies:
