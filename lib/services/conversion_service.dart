@@ -65,10 +65,10 @@ class ConversionService {
     final body = await utf8.decodeStream(stream);
     print(body.split("&").map(
           (e) => MapEntry<String, dynamic>(e.split("=")[0], e.split("=")[1]),
-    ));
+        ));
     return Map<String, dynamic>.fromEntries(body.split("&").map(
           (e) => MapEntry<String, dynamic>(e.split("=")[0], e.split("=")[1]),
-    ));
+        ));
   }
 
   /// Converts a JSON string to an object of type T.
@@ -76,6 +76,9 @@ class ConversionService {
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
   static T? convert<T>(String body) {
+    if (T == dynamic) {
+      return jsonDecode(body) as T;
+    }
     if (T == String) {
       return body as T;
     } else if (T == int) {

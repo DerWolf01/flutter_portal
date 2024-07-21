@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "66.0.0"
+  advanced_change_notifier:
+    dependency: "direct main"
+    description:
+      name: advanced_change_notifier
+      sha256: "5c9b65449a308a7b14f72e3e48a8db5d2d18adaa9cbf157b545dae8462f5a755"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   analyzer:
     dependency: "direct main"
     description:
