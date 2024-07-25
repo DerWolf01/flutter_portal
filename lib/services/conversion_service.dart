@@ -58,9 +58,12 @@ class ConversionService {
                           .map((e) =>
                               mapToObject(e, type: type.type.reflectedType))
                           .toList());
+                } else if (value is Map<String, dynamic>) {
+                  return MapEntry(
+                      key, mapToObject(value, type: type.type.reflectedType));
+                } else {
+                  return MapEntry(key, value);
                 }
-                return MapEntry(
-                    key, mapToObject(value, type: type.type.reflectedType));
               },
             )
             .values
