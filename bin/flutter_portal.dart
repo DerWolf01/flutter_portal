@@ -1,4 +1,5 @@
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:flutter_portal/services/conversion_service.dart';
 import 'package:flutter_portal/services/convertable.dart';
 import './flutter_portal.reflectable.dart';
 
@@ -10,18 +11,27 @@ class SignUpResult {
 }
 
 @convertable
-class SignUpForm {
-  const SignUpForm(this.email, this.password);
+class User {
+  const User(this.name);
 
-  final String email;
-  final String password;
+  final String name;
+}
+
+@convertable
+class SignUpForm {
+  const SignUpForm(this.user);
+
+  final User user;
 }
 
 void main(List<String> arguments) async {
   initializeReflectable();
-  FlutterPortal.init(host: "0.0.0.0", port: 3000);
-  final res = await flutterPortal.post<SignUpResult>(
-      "auth/sign-up", SignUpForm("test@mail.com", "asdasda"));
-
-  print("got $res");
+  print(ConversionService.mapToObject(
+      ConversionService.objectToMap(SignUpForm(User("test"))),
+      type: SignUpForm));
+  // FlutterPortal.init(host: "0.0.0.0", port: 3000);
+  // final res = await flutterPortal.post<SignUpResult>(
+  //     "auth/sign-up", SignUpForm("test@mail.com", "asdasda"));
+  //
+  // print("got $res");
 }

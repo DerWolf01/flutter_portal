@@ -43,7 +43,28 @@ class ConversionService {
   /// \return An instance of type T.
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
     var classMirror = reflectClass(type ?? T);
-    Object instance = classMirror.newInstance("", map.values.toList());
+    Object instance = classMirror.newInstance(
+        "",
+        map
+            .map(
+              (key, value) {
+                final type = classMirror.declarations[key] as VariableMirror;
+                if (isPrimitive(type.type.reflectedType)) {
+                  return MapEntry(key, value);
+                } else if (value is List) {
+                  return MapEntry(
+                      key,
+                      value
+                          .map((e) =>
+                              mapToObject(e, type: type.type.reflectedType))
+                          .toList());
+                }
+                return MapEntry(
+                    key, mapToObject(value, type: type.type.reflectedType));
+              },
+            )
+            .values
+            .toList());
     return instance as T;
   }
 
@@ -115,6 +136,18 @@ class ConversionService {
     }
   }
 
-  static bool isPrimitive(dynamic object) =>
-      object is String || object is num || object is bool;
+  static bool isPrimitive(dynamic object) => (object is String ||
+      object is num ||
+      object is bool ||
+      object is List<String> ||
+      object is List<int> ||
+      object is List<bool> ||
+      object == String ||
+      object == num ||
+      object == bool ||
+      object == (List<String>) ||
+      object == (List<int>) ||
+      object == (List<double>) ||
+      object == (List<num>) ||
+      object == (List<bool>));
 }
