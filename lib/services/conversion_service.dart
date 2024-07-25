@@ -20,8 +20,16 @@ class ConversionService {
       if (declaration is VariableMirror && !declaration.isStatic) {
         var fieldName = name;
         var fieldValue = mirror.invokeGetter(name);
-
-        map[fieldName] = fieldValue;
+        if (isPrimitive(fieldValue) ||
+            fieldValue is List<String> ||
+            fieldValue is List<int> ||
+            fieldValue is List<bool>) {
+          map[fieldName] = fieldValue;
+        } else if (fieldValue is List) {
+          map[fieldName] = fieldValue.map((e) => objectToMap(e)).toList();
+        } else {
+          map[fieldName] = objectToMap(fieldValue);
+        }
       }
     });
 
@@ -106,4 +114,7 @@ class ConversionService {
       throw Exception(e);
     }
   }
+
+  static bool isPrimitive(dynamic object) =>
+      object is String || object is num || object is bool;
 }
