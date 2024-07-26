@@ -61,10 +61,10 @@ class ConversionService {
             .map(
               (key, value) {
                 final type = decs[key] as VariableMirror;
-                print(
-                    "Type: ${type.type.reflectedType} Value: $value Key: $key");
+                print("Type: ${type.type.reflectedType} Value: $value Key: $key");
                 if (isPrimitive(type.type.reflectedType)) {
-                  return MapEntry(key, value);
+                  return MapEntry(
+                      key, convert(value, type: type.type.reflectedType));
                 } else if (value is List) {
                   return MapEntry(
                       key,
@@ -121,7 +121,7 @@ class ConversionService {
   ///
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
-  static dynamic? convert<T>(String body, {Type? type}) {
+  static dynamic? convert<T>(dynamic body, {Type? type}) {
     final t = type ?? T;
     if (t == dynamic) {
       return jsonDecode(body);
@@ -133,7 +133,7 @@ class ConversionService {
     } else if (t == double) {
       return double.parse(body);
     } else if (t == bool) {
-      return (body == "true");
+      return (body.toString() == "true");
     }
 
     return mapToObject<T>(jsonDecode(body));
