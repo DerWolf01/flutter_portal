@@ -35,6 +35,16 @@ class ConversionService {
     return map;
   }
 
+  static Map<String, DeclarationMirror> declarations(ClassMirror classMirror) {
+    final declerations = classMirror.declarations;
+    ClassMirror? superClass = classMirror.superclass;
+    while (superClass != null) {
+      declerations.addAll(superClass.declarations);
+      superClass = superClass.superclass;
+    }
+    return declerations;
+  }
+
   /// Converts a map to an object of type T.
   ///
   /// \param map The map to convert.
@@ -42,12 +52,13 @@ class ConversionService {
   /// \return An instance of type T.
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
     var classMirror = reflectClass(type ?? T);
+    final decs = declarations(classMirror);
     Object instance = classMirror.newInstance(
         "",
         map
             .map(
               (key, value) {
-                final type = classMirror.declarations[key] as VariableMirror;
+                final type = decs[key] as VariableMirror;
                 if (isPrimitive(type.type.reflectedType)) {
                   return MapEntry(key, value);
                 } else if (value is List) {
