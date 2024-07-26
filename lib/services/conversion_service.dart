@@ -36,7 +36,7 @@ class ConversionService {
   }
 
   static Map<String, DeclarationMirror> declarations(ClassMirror classMirror) {
-    final declerations = classMirror.declarations;
+    Map<String, DeclarationMirror> declerations = classMirror.declarations;
     ClassMirror? superClass = classMirror.superclass;
     while (superClass != null) {
       declerations.addAll(superClass.declarations);
