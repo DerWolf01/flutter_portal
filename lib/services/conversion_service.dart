@@ -131,7 +131,7 @@ class ConversionService {
       return int.parse(body);
     } else if (t == double) {
       return double.parse(body);
-    } else if (t is bool) {
+    } else if (t == bool) {
       return (body == "true");
     }
 
