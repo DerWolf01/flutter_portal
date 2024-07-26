@@ -61,6 +61,7 @@ class ConversionService {
             .map(
               (key, value) {
                 final type = decs[key] as VariableMirror;
+                print("Type: ${type.type.reflectedType} Value: $value Key: $key");
                 if (isPrimitive(type.type.reflectedType)) {
                   return MapEntry(
                       key, convert(value, type: type.type.reflectedType));
