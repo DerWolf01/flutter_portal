@@ -62,7 +62,8 @@ class ConversionService {
               (key, value) {
                 final type = decs[key] as VariableMirror;
                 if (isPrimitive(type.type.reflectedType)) {
-                  return MapEntry(key, value);
+                  return MapEntry(
+                      key, convert(value, type: type.type.reflectedType));
                 } else if (value is List) {
                   return MapEntry(
                       key,
