@@ -1,3 +1,5 @@
+import 'package:flutter_portal/portal_exception.dart';
+import 'package:flutter_portal/portal_result.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -50,11 +52,12 @@ class FlutterPortal {
             queryParameters: params,
             scheme: 'http'),
         headers: headers);
-    if (response.statusCode < 200 || response.statusCode > 300) {
-      print("got status code ${response.statusCode} from $endPoint");
-    }
+    // if (response.statusCode < 200 || response.statusCode > 300) {
+    //   throw PortalException(response.statusCode, response.body);
+    // }
 
-    return ConversionService.convert<ResponseWith>(response.body);
+    return PortalResult(response.statusCode,
+        ConversionService.convert<ResponseWith>(response.body));
   }
 
   /// Sends a POST request to the specified endpoint with the given data.
@@ -62,17 +65,18 @@ class FlutterPortal {
   /// \param endPoint The endpoint to send the request to.
   /// \param data The data to include in the request body.
   /// \return A Future that resolves to the response converted to the specified type.
-  Future<ResponseWith?> post<ResponseWith>(String endPoint, dynamic data,
+  Future<PortalResult<ResponseWith>?> post<ResponseWith>(
+      String endPoint, dynamic data,
       {Map<String, String>? headers}) async {
     var response = await http.post(
         Uri(host: host, port: port, path: endPoint, scheme: 'http'),
         body: ConversionService.convertToStringOrJson(data),
         headers: headers);
-    if (response.statusCode < 200 || response.statusCode > 300) {
-      print("got status code ${response.statusCode} from $endPoint");
-    }
-    print(response.body);
+    // if (response.statusCode < 200 || response.statusCode > 300) {
+    //   throw PortalException(response.statusCode, response.body);
+    // }
 
-    return ConversionService.convert<ResponseWith>(response.body);
+    return PortalResult(response.statusCode,
+        ConversionService.convert<ResponseWith>(response.body));
   }
 }

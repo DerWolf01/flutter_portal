@@ -16,22 +16,21 @@ class ConversionService {
 
     var map = <String, dynamic>{};
 
-    classMirror.declarations.forEach((name, declaration) {
+    for (final entry in classMirror.declarations.entries) {
+      final declaration = entry.value;
+      final name = entry.key;
       if (declaration is VariableMirror && !declaration.isStatic) {
-        var fieldName = name;
         var fieldValue = mirror.invokeGetter(name);
-        if (isPrimitive(fieldValue) ||
-            fieldValue is List<String> ||
-            fieldValue is List<int> ||
-            fieldValue is List<bool>) {
-          map[fieldName] = fieldValue;
+        if (isPrimitive(fieldValue)) {
+          map[name] = fieldValue;
         } else if (fieldValue is List) {
-          map[fieldName] = fieldValue.map((e) => objectToMap(e)).toList();
+          map[name] = fieldValue.map((e) => objectToMap(e)).toList();
         } else {
-          map[fieldName] = objectToMap(fieldValue);
+          map[name] = objectToMap(fieldValue);
         }
       }
-    });
+    }
+    ;
 
     return map;
   }
@@ -107,18 +106,19 @@ class ConversionService {
   ///
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
-  static T? convert<T>(String body) {
-    if (T == dynamic) {
-      return jsonDecode(body) as T;
+  static dynamic? convert<T>(String body, {Type? type}) {
+    final t = type ?? T;
+    if (t == dynamic) {
+      return jsonDecode(body);
     }
-    if (T == String) {
-      return body as T;
-    } else if (T == int) {
-      return int.parse(body) as T;
-    } else if (T == double) {
-      return double.parse(body) as T;
-    } else if (T is bool) {
-      return (body == "true") as T;
+    if (t == String) {
+      return body;
+    } else if (t == int) {
+      return int.parse(body);
+    } else if (t == double) {
+      return double.parse(body);
+    } else if (t is bool) {
+      return (body == "true");
     }
 
     return mapToObject<T>(jsonDecode(body));
