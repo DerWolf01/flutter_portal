@@ -16,7 +16,7 @@ class ConversionService {
 
     var map = <String, dynamic>{};
 
-    for (final entry in classMirror.declarations.entries) {
+    for (final entry in declarations(classMirror).entries) {
       final declaration = entry.value;
       final name = entry.key;
       if (declaration is VariableMirror && !declaration.isStatic) {
@@ -44,7 +44,9 @@ class ConversionService {
       declerations.addAll(superClass.declarations);
       superClass = superClass.superclass;
     }
-    return declerations;
+    return Map.fromEntries(declerations.entries.where(
+      (entry) => entry.value is VariableMirror,
+    ));
   }
 
   /// Converts a map to an object of type T.
@@ -55,13 +57,15 @@ class ConversionService {
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
     var classMirror = reflectClass(type ?? T);
     final decs = declarations(classMirror);
+    print(decs);
     Object instance = classMirror.newInstance(
         "",
         map
             .map(
               (key, value) {
                 final type = decs[key] as VariableMirror;
-                print("Type: ${type.type.reflectedType} Value: $value Key: $key");
+                print(
+                    "Type: ${type.type.reflectedType} Value: $value Key: $key");
                 if (isPrimitive(type.type.reflectedType)) {
                   return MapEntry(
                       key, convert(value, type: type.type.reflectedType));

@@ -22,16 +22,16 @@ class Convertable extends Reflectable {
   /// - `typeAnnotationDeepQuantifyCapability`: Enables deep type annotation quantification.
   const Convertable()
       : super(
-      instanceInvokeCapability,
-      declarationsCapability,
-      libraryCapability,
-      typeRelationsCapability,
-      metadataCapability,
-      typeCapability,
-      reflectedTypeCapability,
-      newInstanceCapability,
-      typeAnnotationQuantifyCapability,
-      typeAnnotationDeepQuantifyCapability);
+            instanceInvokeCapability,
+            declarationsCapability,
+            typeRelationsCapability,
+            metadataCapability,
+            typeCapability,
+            reflectedTypeCapability,
+            newInstanceCapability,
+            superclassQuantifyCapability,
+            typeAnnotationQuantifyCapability,
+            typeAnnotationDeepQuantifyCapability);
 }
 
 /// A constant instance of the `Convertable` class.
