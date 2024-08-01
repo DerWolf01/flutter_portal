@@ -52,14 +52,13 @@ class FlutterPortal {
             queryParameters: params,
             scheme: 'http'),
         headers: headers);
-    // if (response.statusCode < 200 || response.statusCode > 300) {
-    //   throw PortalException(response.statusCode, response.body);
-    // }
+    if (response.statusCode < 200 || response.statusCode > 300) {
+      throw PortalException(response.statusCode, response.body);
+    }
 
     return PortalResult(response.statusCode,
         ConversionService.convert<ResponseWith>(response.body));
   }
-
 
   /// Sends a POST request to the specified endpoint with the given data.
   ///
@@ -73,9 +72,9 @@ class FlutterPortal {
         Uri(host: host, port: port, path: endPoint, scheme: 'http'),
         body: ConversionService.convertToStringOrJson(data),
         headers: headers);
-    // if (response.statusCode < 200 || response.statusCode > 300) {
-    //   throw PortalException(response.statusCode, response.body);
-    // }
+    if (response.statusCode < 200 || response.statusCode > 300) {
+      throw PortalException(response.statusCode, response.body);
+    }
 
     return PortalResult(response.statusCode,
         ConversionService.convert<ResponseWith>(response.body));
