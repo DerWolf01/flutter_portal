@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter_portal/reflection.dart';
 import 'package:reflectable/reflectable.dart';
 
@@ -25,6 +26,8 @@ class ConversionService {
           map[name] = fieldValue;
         } else if (fieldValue is List) {
           map[name] = fieldValue.map((e) => objectToMap(e)).toList();
+        } else if (fieldValue is File) {
+          map[name] = fieldValue.readAsBytesSync();
         } else {
           map[name] = objectToMap(fieldValue);
         }
@@ -55,7 +58,6 @@ class ConversionService {
   /// \param type The type of the object to create (optional).
   /// \return An instance of type T.
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
-
     var classMirror = reflectClass(type ?? T);
     final decs = declarations(classMirror);
     print(decs);
@@ -67,6 +69,12 @@ class ConversionService {
                 final type = decs[key] as VariableMirror;
                 print(
                     "Type: ${type.type.reflectedType} Value: $value Key: $key");
+
+                if (classMirror.reflectedType is File ||
+                    classMirror.reflectedType == File && value is List<int>) {
+                  return MapEntry(
+                      key, File.fromRawPath(Uint8List.fromList(value)));
+                }
                 if (isPrimitive(type.type.reflectedType)) {
                   return MapEntry(
                       key, convert(value, type: type.type.reflectedType));
