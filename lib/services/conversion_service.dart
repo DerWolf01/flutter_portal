@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_portal/reflection.dart';
 import 'package:reflectable/reflectable.dart';
 
+//TODO Implement json service in order to avoid converting Files to int list in the conversion service
 /// A service class for converting objects to maps and vice versa,
 /// as well as handling HTTP request conversions.
 class ConversionService {
@@ -27,7 +28,7 @@ class ConversionService {
         } else if (fieldValue is List) {
           map[name] = fieldValue.map((e) => objectToMap(e)).toList();
         } else if (fieldValue is File) {
-          map[name] = fieldValue.readAsBytesSync();
+          map[name] = base64.encode(fieldValue.readAsBytesSync());
         } else {
           map[name] = objectToMap(fieldValue);
         }
@@ -71,9 +72,10 @@ class ConversionService {
                     "Type: ${type.type.reflectedType} Value: $value Key: $key");
 
                 if (classMirror.reflectedType is File ||
-                    classMirror.reflectedType == File && value is List<int>) {
-                  return MapEntry(
-                      key, File.fromRawPath(Uint8List.fromList(value)));
+                    classMirror.reflectedType == File) {
+                  final f = File("./random.file");
+                  f.writeAsBytesSync(base64.decode(value));
+                  return MapEntry(key, f);
                 }
                 if (isPrimitive(type.type.reflectedType)) {
                   return MapEntry(
