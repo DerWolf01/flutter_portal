@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_portal/method_service.dart';
 import 'package:flutter_portal/reflection.dart';
+import 'package:flutter_portal/services/convertable.dart';
 import 'package:reflectable/reflectable.dart';
 
 //TODO Implement json service in order to avoid converting Files to int list in the conversion service
@@ -59,128 +61,146 @@ class ConversionService {
   /// \param type The type of the object to create (optional).
   /// \return An instance of type T.
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
-    var classMirror = reflectClass(type ?? T);
-    final decs = declarations(classMirror);
+    final classMirror = convertable.reflectType(type ?? T);
+    final decs = declarations(classMirror as ClassMirror);
     print(decs);
+    final constructor = classMirror.declarations.values.firstWhere(
+      (element) => element is MethodMirror && element.isConstructor,
+    ) as MethodMirror;
+    final MethodParameters methodParameters =
+        MethodService().methodArgumentsByMap(
+      methodMirror: constructor,
+      argumentsMap: map,
+    );
     Object instance = classMirror.newInstance(
         "",
-        map
-            .map(
-              (key, value) {
-                final type = decs[key] as VariableMirror;
-                print(
-                    "Type: ${type.type.reflectedType} Value: $value Key: $key");
-
-                if (classMirror.reflectedType is File ||
-                    classMirror.reflectedType == File) {
-                  final f = File("./random.file");
-                  f.writeAsBytesSync(base64.decode(value));
-                  return MapEntry(key, f);
-                }
-                if (isPrimitive(type.type.reflectedType)) {
-                  return MapEntry(
-                      key, convert(value, type: type.type.reflectedType));
-                } else if (value is List) {
-                  return MapEntry(
-                      key,
-                      value
-                          .map((e) =>
-                              mapToObject(e, type: type.type.reflectedType))
-                          .toList());
-                } else if (value is Map<String, dynamic>) {
-                  return MapEntry(
-                      key, mapToObject(value, type: type.type.reflectedType));
-                } else {
-                  return MapEntry(key, value);
-                }
-              },
-            )
-            .values
-            .toList());
+        methodParameters.args,
+        methodParameters.namedArgs.map(
+          (key, value) => MapEntry(Symbol(key), value),
+        ));
     return instance as T;
   }
 
-  /// Converts an HTTP request to a map.
-  ///
-  /// \param request The HTTP request to convert.
-  /// \return A Future that resolves to a map representation of the request body.
-  static Future<Map<String, dynamic>> requestToMap(HttpRequest request) async {
-    final body = await utf8.decodeStream(request);
-    return jsonDecode(body);
-  }
-
-  /// Converts an HTTP request to an object of type T.
-  ///
-  /// \param request The HTTP request to convert.
-  /// \param type The type of the object to create (optional).
-  /// \return A Future that resolves to an instance of type T.
   static Future<T> requestToObject<T>(HttpRequest request, {Type? type}) async {
-    return mapToObject<T>(await streamToMap(request), type: type);
+    return mapToObject<T>(await requestToRequestDataMap(request), type: type);
   }
 
-  /// Converts a stream of bytes to a map.
-  ///
-  /// \param stream The stream to convert.
-  /// \return A Future that resolves to a map representation of the stream.
-  static streamToMap(Stream<List<int>> stream) async {
-    final body = await utf8.decodeStream(stream);
-    print(body.split("&").map(
-          (e) => MapEntry<String, dynamic>(e.split("=")[0], e.split("=")[1]),
-        ));
-    return Map<String, dynamic>.fromEntries(body.split("&").map(
-          (e) => MapEntry<String, dynamic>(e.split("=")[0], e.split("=")[1]),
-        ));
+  static Future<Map<String, dynamic>> requestToRequestDataMap(
+      HttpRequest request,
+      {Type? type}) async {
+    return request.method == "GET"
+        ? request.uri.queryParameters
+        : jsonDecode(await utf8.decodeStream(request));
   }
 
   /// Converts a JSON string to an object of type T.
   ///
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
-  static dynamic? convert<T>(dynamic body, {Type? type}) {
+  static dynamic convert<T>({Type? type, dynamic value}) {
     final t = type ?? T;
-    if (t == dynamic) {
-      return jsonDecode(body);
-    }
-    if (t == String) {
-      return body;
-    } else if (t == int) {
-      return int.parse(body);
-    } else if (t == double) {
-      return double.parse(body);
-    } else if (t == bool) {
-      return (body.toString() == "true");
-    }
 
-    return mapToObject<T>(jsonDecode(body));
+    print("type: $t  valueType: ${value.runtimeType}");
+
+    if (value == null && isNullable(convertable.reflectType(t))) {
+      print("isNull");
+      return null;
+    } else if (t is File || t == File) {
+      print("isFile: $value to map ");
+      final f = File("random.file");
+      f.writeAsBytesSync(base64.decode(value));
+
+      return f;
+    } else if (isPrimitive(t)) {
+      print("isPrimitive: $value to map ");
+      if (value.runtimeType == t) {
+        return value;
+      }
+      return convertPrimitive(value, t);
+    } else if (value is List) {
+      print("isList: $value to map ");
+      return value.map((e) => mapToObject(e, type: t)).toList();
+    } else if (value is Map<String, dynamic>) {
+      print("isMap: $value to map ");
+      if (t == dynamic || t is Map || t == Map) {
+        return value;
+      } else {
+        return mapToObject(value, type: t);
+      }
+    } else {
+      print("is${value.runtimeType}: $value to map ");
+
+      if (value.runtimeType == t) {
+        return value;
+      }
+      print("isObject: $value to map ");
+
+      return objectToMap(value);
+    }
   }
 
   /// Converts an object to a JSON string or its string representation.
   ///
   /// \param object The object to convert.
   /// \return A JSON string or string representation of the object.
-  static String convertToStringOrJson(dynamic object) {
-    if (object is String || object is num || object is bool) {
-      return object.toString();
+  static String encodeJSON(dynamic object) {
+    if (isPrimitive(object)) {
+      return jsonEncode(object);
     }
+    final map = objectToMap(object);
+    print("map: $map");
+    late final String json;
+
     try {
-      return jsonEncode(objectToMap(object));
-    } catch (e) {
-      throw Exception(e);
+      json = jsonEncode(map);
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
+    return json;
+  }
+
+  static dynamic convertPrimitive(dynamic body, Type T) {
+    if (T == dynamic) {
+      return jsonDecode(body);
+    }
+    if (T == File) {
+      return File.fromRawPath(Uint8List.fromList(jsonDecode(body)));
+    }
+    if (T == String) {
+      return body;
+    } else if (T == int) {
+      return int.parse(body);
+    } else if (T == double) {
+      return double.parse(body);
+    } else if (T == bool) {
+      return (body == "true");
     }
   }
 
+  static isNullable(TypeMirror type) =>
+      (reflect(null).type.isSubtypeOf(type)) ||
+      (reflect(null).type.isAssignableTo(type)) ||
+      (type.reflectedType == Null) ||
+      (type.reflectedType == dynamic);
+
   static bool isPrimitive(dynamic object) => (object is String ||
       object is num ||
+      object is int ||
+      object is double ||
       object is bool ||
       object is List<String> ||
       object is List<int> ||
       object is List<bool> ||
       object == String ||
       object == num ||
+      object == int ||
+      object == double ||
       object == bool ||
       object == (List<String>) ||
       object == (List<int>) ||
       object == (List<double>) ||
       object == (List<num>) ||
+      object == null ||
       object == (List<bool>));
 }

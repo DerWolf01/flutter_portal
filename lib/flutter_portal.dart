@@ -2,6 +2,12 @@ import 'package:flutter_portal/portal_exception.dart';
 import 'package:flutter_portal/portal_result.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
 import 'package:http/http.dart' as http;
+export 'package:flutter_portal/portal_exception.dart';
+export 'package:flutter_portal/portal_result.dart';
+export 'package:flutter_portal/services/conversion_service.dart';
+export 'package:flutter_portal/services/convertable.dart';
+export 'package:flutter_portal/method_service.dart';
+export 'package:flutter_portal/reflection.dart';
 
 /// Singleton class to manage HTTP requests to a specified host and port.
 FlutterPortal get flutterPortal => FlutterPortal();
@@ -57,7 +63,7 @@ class FlutterPortal {
     }
 
     return PortalResult(response.statusCode,
-        ConversionService.convert<ResponseWith>(response.body));
+        ConversionService.convert<ResponseWith>(value: response.body));
   }
 
   /// Sends a POST request to the specified endpoint with the given data.
@@ -70,13 +76,13 @@ class FlutterPortal {
       {Map<String, String>? headers}) async {
     var response = await http.post(
         Uri(host: host, port: port, path: endPoint, scheme: 'http'),
-        body: ConversionService.convertToStringOrJson(data),
+        body: ConversionService.encodeJSON(data),
         headers: headers);
     if (response.statusCode < 200 || response.statusCode > 300) {
       throw PortalException(response.statusCode, response.body);
     }
 
     return PortalResult(response.statusCode,
-        ConversionService.convert<ResponseWith>(response.body));
+        ConversionService.convert<ResponseWith>(value: response.body));
   }
 }
