@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_portal/reflection.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
+import 'package:flutter_portal/services/convertable.dart';
 import 'package:reflectable/reflectable.dart';
 
 typedef OnParameterAnotations = List<OnParameterAnotation>;
@@ -91,17 +92,17 @@ class MethodService {
       if (argumentsMap.containsKey(name)) {
         print('name $name ${argumentsMap[name]}');
         if (param.isNamed) {
-          namedArgs[name] =
-              ConversionService.convert(type: type, value: argumentsMap[name]);
+          namedArgs[name] = ConversionService.primitiveStructureToObject(
+              type: param.type, value: argumentsMap[name]);
 
           continue;
         }
-        print("converting $type ${argumentsMap[name]}");
+        print("primitiveStructureToObjecting $type ${argumentsMap[name]}");
 
-        args.add(
-            ConversionService.convert(type: type, value: argumentsMap[name]));
+        args.add(ConversionService.primitiveStructureToObject(
+            type: param.type, value: argumentsMap[name]));
       } else {
-        if (ConversionService.isNullable(param.type)) {
+        if (ConversionService.isNullable(param.type.reflectedType)) {
           args.add(null);
           continue;
         } else {

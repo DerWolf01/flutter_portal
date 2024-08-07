@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_portal/portal_exception.dart';
 import 'package:flutter_portal/portal_result.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
+import 'package:flutter_portal/services/convertable.dart';
 import 'package:http/http.dart' as http;
 export 'package:flutter_portal/portal_exception.dart';
 export 'package:flutter_portal/portal_result.dart';
@@ -47,9 +50,8 @@ class FlutterPortal {
   /// \param endPoint The endpoint to send the request to.
   /// \param params The query parameters for the request.
   /// \return A Future that resolves to the response converted to the specified type.
-  Future<dynamic> get<ResponseWith>(
-      String endPoint, Map<String, dynamic> params,
-      {Map<String, String>? headers}) async {
+  Future<dynamic> get<ResponseWith>(String endPoint,
+      {Map<String, dynamic>? params, Map<String, String>? headers}) async {
     var response = await http.get(
         Uri(
             host: host,
@@ -62,8 +64,10 @@ class FlutterPortal {
       throw PortalException(response.statusCode, response.body);
     }
 
-    return PortalResult(response.statusCode,
-        ConversionService.convert<ResponseWith>(value: response.body));
+    return PortalResult(
+        response.statusCode,
+        ConversionService.primitiveStructureToObject<ResponseWith>(
+            value: jsonDecode(response.body), type: convertable.reflectType(ResponseWith)));
   }
 
   /// Sends a POST request to the specified endpoint with the given data.
@@ -75,14 +79,21 @@ class FlutterPortal {
       String endPoint, dynamic data,
       {Map<String, String>? headers}) async {
     var response = await http.post(
-        Uri(host: host, port: port, path: endPoint, scheme: 'http'),
+        Uri(
+          host: host,
+          port: port,
+          path: endPoint,
+          scheme: 'http',
+        ),
         body: ConversionService.encodeJSON(data),
         headers: headers);
     if (response.statusCode < 200 || response.statusCode > 300) {
       throw PortalException(response.statusCode, response.body);
     }
 
-    return PortalResult(response.statusCode,
-        ConversionService.convert<ResponseWith>(value: response.body));
+    return PortalResult(
+        response.statusCode,
+        ConversionService.primitiveStructureToObject<ResponseWith>(
+            value: jsonDecode(response.body)));
   }
 }

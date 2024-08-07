@@ -65,7 +65,10 @@ class ConversionService {
     final decs = declarations(classMirror as ClassMirror);
     print(decs);
     final constructor = classMirror.declarations.values.firstWhere(
-      (element) => element is MethodMirror && element.isConstructor,
+      (element) =>
+          element is MethodMirror &&
+          element.isConstructor &&
+          element.constructorName == "",
     ) as MethodMirror;
     final MethodParameters methodParameters =
         MethodService().methodArgumentsByMap(
@@ -97,12 +100,15 @@ class ConversionService {
   ///
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
-  static dynamic convert<T>({Type? type, dynamic value}) {
-    final t = type ?? T;
+  static dynamic primitiveStructureToObject<T>(
+      {TypeMirror? type, required value}) {
+    final t = type?.reflectedType ?? T;
 
-    print("type: $t  valueType: ${value.runtimeType}");
-
-    if (value == null && isNullable(convertable.reflectType(t))) {
+    print(t);
+    print("isNullable: ${type?.isNullable}");
+    if (value.runtimeType == t) {
+      return value;
+    } else if (value == null && (type?.isNullable ?? false)) {
       print("isNull");
       return null;
     } else if (t is File || t == File) {
@@ -120,23 +126,10 @@ class ConversionService {
     } else if (value is List) {
       print("isList: $value to map ");
       return value.map((e) => mapToObject(e, type: t)).toList();
-    } else if (value is Map<String, dynamic>) {
-      print("isMap: $value to map ");
-      if (t == dynamic || t is Map || t == Map) {
-        return value;
-      } else {
-        return mapToObject(value, type: t);
-      }
-    } else {
-      print("is${value.runtimeType}: $value to map ");
-
-      if (value.runtimeType == t) {
-        return value;
-      }
-      print("isObject: $value to map ");
-
-      return objectToMap(value);
     }
+    print("is${value.runtimeType}: $value to map ");
+
+    return mapToObject(value, type: t);
   }
 
   /// Converts an object to a JSON string or its string representation.
@@ -178,11 +171,9 @@ class ConversionService {
     }
   }
 
-  static isNullable(TypeMirror type) =>
-      (reflect(null).type.isSubtypeOf(type)) ||
-      (reflect(null).type.isAssignableTo(type)) ||
-      (type.reflectedType == Null) ||
-      (type.reflectedType == dynamic);
+  static bool isNullable(Type type) {
+    return type.toString().endsWith("?");
+  }
 
   static bool isPrimitive(dynamic object) => (object is String ||
       object is num ||
