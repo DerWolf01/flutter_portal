@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter_portal/portal_exception.dart';
 import 'package:flutter_portal/portal_result.dart';
@@ -50,7 +51,7 @@ class FlutterPortal {
   /// \param endPoint The endpoint to send the request to.
   /// \param params The query parameters for the request.
   /// \return A Future that resolves to the response converted to the specified type.
-  Future<dynamic> get<ResponseWith>(String endPoint,
+  Future<PortalResult<ResponseWith>> get<ResponseWith>(String endPoint,
       {Map<String, dynamic>? params, Map<String, String>? headers}) async {
     var response = await http.get(
         Uri(
@@ -67,7 +68,8 @@ class FlutterPortal {
     return PortalResult(
         response.statusCode,
         ConversionService.primitiveStructureToObject<ResponseWith>(
-            value: jsonDecode(response.body), type: convertable.reflectType(ResponseWith)));
+            value: jsonDecode(response.body),
+            type: convertable.reflectType(ResponseWith)));
   }
 
   /// Sends a POST request to the specified endpoint with the given data.
@@ -77,14 +79,16 @@ class FlutterPortal {
   /// \return A Future that resolves to the response converted to the specified type.
   Future<PortalResult<ResponseWith>?> post<ResponseWith>(
       String endPoint, dynamic data,
-      {Map<String, String>? headers}) async {
+      {Map<String, String>? headers,
+      Map<String, dynamic>? queryParameters,
+      Scheme scheme = Scheme.http}) async {
     var response = await http.post(
         Uri(
-          host: host,
-          port: port,
-          path: endPoint,
-          scheme: 'http',
-        ),
+            host: host,
+            port: port,
+            path: endPoint,
+            scheme: scheme.name,
+            queryParameters: queryParameters),
         body: ConversionService.encodeJSON(data),
         headers: headers);
     if (response.statusCode < 200 || response.statusCode > 300) {
@@ -96,4 +100,9 @@ class FlutterPortal {
         ConversionService.primitiveStructureToObject<ResponseWith>(
             value: jsonDecode(response.body)));
   }
+}
+
+enum Scheme {
+  http,
+  https,
 }

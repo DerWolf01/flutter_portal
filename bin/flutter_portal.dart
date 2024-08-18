@@ -36,12 +36,25 @@ void main(List<String> arguments) async {
       ConversionService.objectToMap(SignUpForm.init(User("test", f))),
       type: SignUpForm));
   FlutterPortal.init(host: "localhost", port: 3000);
-  final PortalResult response =
-      await flutterPortal.get<UserProfile>("/user/me", headers: {
+  final PortalResult<String>? response = await flutterPortal.post<String>(
+      "/user/profile-picture/upload", ProfilePicture(f),
+      headers: {
+        "Authorization":
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJCaWxhbC5kZW1pcmNpMDAxQGdtYWlsLmNvbSIsIm5hbWUiOiIiLCJsYXN0bmFtZSI6IiIsInVzZXJuYW1lIjoiIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIyNzE3NDk0fQ.G9-EqBmZRFtdfz13Sq7Pi9XWRHlIjq-G22NE3ctSaT0"
+      });
+  print(response?.data);
+  final data = await flutterPortal.get<UserProfile>("/user/me", headers: {
     "Authorization":
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJCaWxhbC5kZW1pcmNpMDAxQGdtYWlsLmNvbSIsIm5hbWUiOiIiLCJsYXN0bmFtZSI6IiIsInVzZXJuYW1lIjoiIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzIyNzE3NDk0fQ.G9-EqBmZRFtdfz13Sq7Pi9XWRHlIjq-G22NE3ctSaT0"
   });
-  print(response.data);
+  print(data.data?.profilePicture);
+}
+
+@convertable
+class ProfilePicture {
+  ProfilePicture(this.file);
+
+  late final File file;
 }
 
 @convertable

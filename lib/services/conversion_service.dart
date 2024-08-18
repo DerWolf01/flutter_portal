@@ -61,6 +61,7 @@ class ConversionService {
   /// \param type The type of the object to create (optional).
   /// \return An instance of type T.
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
+    print("mapToObject for ${type ?? T}");
     final classMirror = convertable.reflectType(type ?? T);
     final decs = declarations(classMirror as ClassMirror);
     print(decs);
@@ -127,7 +128,7 @@ class ConversionService {
       print("isList: $value to map ");
       return value.map((e) => mapToObject(e, type: t)).toList();
     }
-    print("is${value.runtimeType}: $value to map ");
+    print("is${value.runtimeType}: $value from Map to ${type?.reflectedType} ");
 
     return mapToObject(value, type: t);
   }
