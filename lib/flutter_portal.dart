@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:flutter_portal/portal_exception.dart';
 import 'package:flutter_portal/portal_result.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
@@ -17,13 +15,13 @@ export 'package:flutter_portal/reflection.dart';
 FlutterPortal get flutterPortal => FlutterPortal();
 
 class FlutterPortal {
-  final String host;
-  final int port;
+  final String? host;
+  final int? port;
 
   static FlutterPortal? _instance;
 
   /// Private constructor for internal use.
-  FlutterPortal._internal({required this.host, required this.port});
+  FlutterPortal._internal({this.host, this.port});
 
   /// Factory constructor to initialize the singleton instance.
   ///
@@ -31,7 +29,7 @@ class FlutterPortal {
   ///
   /// \param host The host address.
   /// \param port The port number.
-  factory FlutterPortal.init({required String host, required int port}) {
+  factory FlutterPortal.init({String? host, int? port}) {
     _instance ??= FlutterPortal._internal(host: host, port: port);
     return _instance!;
   }
@@ -52,10 +50,16 @@ class FlutterPortal {
   /// \param params The query parameters for the request.
   /// \return A Future that resolves to the response converted to the specified type.
   Future<PortalResult<ResponseWith>> get<ResponseWith>(String endPoint,
-      {Map<String, dynamic>? params, Map<String, String>? headers}) async {
+      {String? host,
+      Map<String, dynamic>? params,
+      Map<String, String>? headers}) async {
+    final useHost = host ?? this.host;
+    if (useHost == null || useHost.isEmpty) {
+      throw Exception('Host not specified in FlutterPortal or method call');
+    }
     var response = await http.get(
         Uri(
-            host: host,
+            host: useHost,
             port: port,
             path: endPoint,
             queryParameters: params,
@@ -79,12 +83,17 @@ class FlutterPortal {
   /// \return A Future that resolves to the response converted to the specified type.
   Future<PortalResult<ResponseWith>?> post<ResponseWith>(
       String endPoint, dynamic data,
-      {Map<String, String>? headers,
+      {String? host,
+      Map<String, String>? headers,
       Map<String, dynamic>? queryParameters,
       Scheme scheme = Scheme.http}) async {
+    final useHost = host ?? this.host;
+    if (useHost == null || useHost.isEmpty) {
+      throw Exception('Host not specified in FlutterPortal or method call');
+    }
     var response = await http.post(
         Uri(
-            host: host,
+            host: useHost,
             port: port,
             path: endPoint,
             scheme: scheme.name,
