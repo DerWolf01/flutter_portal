@@ -17,11 +17,12 @@ FlutterPortal get flutterPortal => FlutterPortal();
 class FlutterPortal {
   final String? host;
   final int? port;
-
+  final Scheme scheme;
   static FlutterPortal? _instance;
 
   /// Private constructor for internal use.
-  FlutterPortal._internal({this.host, this.port});
+  FlutterPortal._internal({this.host, this.port, Scheme? scheme})
+      : scheme = scheme ?? Scheme.http;
 
   /// Factory constructor to initialize the singleton instance.
   ///
@@ -29,8 +30,9 @@ class FlutterPortal {
   ///
   /// \param host The host address.
   /// \param port The port number.
-  factory FlutterPortal.init({String? host, int? port}) {
-    _instance ??= FlutterPortal._internal(host: host, port: port);
+  factory FlutterPortal.init({String? host, int? port, Scheme? scheme}) {
+    _instance ??=
+        FlutterPortal._internal(host: host, port: port, scheme: scheme);
     return _instance!;
   }
 
@@ -52,7 +54,9 @@ class FlutterPortal {
   Future<PortalResult<ResponseWith>> get<ResponseWith>(String endPoint,
       {String? host,
       Map<String, dynamic>? params,
-      Map<String, String>? headers}) async {
+      Map<String, String>? headers,
+      Scheme? scheme}) async {
+    final useScheme = scheme ?? this.scheme;
     final useHost = host ?? this.host;
     if (useHost == null || useHost.isEmpty) {
       throw Exception('Host not specified in FlutterPortal or method call');
@@ -63,7 +67,7 @@ class FlutterPortal {
             port: port,
             path: endPoint,
             queryParameters: params,
-            scheme: 'http'),
+            scheme: useScheme.name),
         headers: headers);
     if (response.statusCode < 200 || response.statusCode > 300) {
       throw PortalException(response.statusCode, response.body);
@@ -86,17 +90,18 @@ class FlutterPortal {
       {String? host,
       Map<String, String>? headers,
       Map<String, dynamic>? queryParameters,
-      Scheme scheme = Scheme.http}) async {
+      Scheme? scheme}) async {
     final useHost = host ?? this.host;
     if (useHost == null || useHost.isEmpty) {
       throw Exception('Host not specified in FlutterPortal or method call');
     }
+    final useScheme = scheme ?? this.scheme;
     var response = await http.post(
         Uri(
             host: useHost,
             port: port,
             path: endPoint,
-            scheme: scheme.name,
+            scheme: useScheme.name,
             queryParameters: queryParameters),
         body: ConversionService.encodeJSON(data),
         headers: headers);
