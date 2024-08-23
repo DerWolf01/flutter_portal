@@ -31,7 +31,6 @@ class Convertable extends Reflectable {
             newInstanceCapability,
             superclassQuantifyCapability,
             typeAnnotationQuantifyCapability,
-            
             typeAnnotationDeepQuantifyCapability);
 }
 

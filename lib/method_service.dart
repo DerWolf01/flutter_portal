@@ -93,14 +93,14 @@ class MethodService {
         print('name $name ${argumentsMap[name]}');
         if (param.isNamed) {
           namedArgs[name] = ConversionService.primitiveStructureToObject(
-              type: param.type, value: argumentsMap[name]);
+              param: param, value: argumentsMap[name]);
 
           continue;
         }
         print("primitiveStructureToObjecting $type ${argumentsMap[name]}");
 
         args.add(ConversionService.primitiveStructureToObject(
-            type: param.type, value: argumentsMap[name]));
+            param: param, value: argumentsMap[name]));
       } else {
         if (ConversionService.isNullable(param.type.reflectedType)) {
           args.add(null);

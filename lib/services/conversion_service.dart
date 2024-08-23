@@ -70,7 +70,7 @@ class ConversionService {
       (element) =>
           element is MethodMirror &&
           element.isConstructor &&
-          element.constructorName == "",
+          element.constructorName == "init",
     ) as MethodMirror;
     final MethodParameters methodParameters =
         MethodService().methodArgumentsByMap(
@@ -103,10 +103,10 @@ class ConversionService {
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
   static dynamic primitiveStructureToObject<T>(
-      {TypeMirror? type, required value}) {
-    final t = type?.reflectedType ?? T;
-    final typeMirror = convertable.reflectType(t);
-    print(t);
+      {TypeMirror? type, ParameterMirror? param, required value}) {
+    final t = (type ?? param?.type)?.reflectedType ?? T;
+    final typeMirror = type ?? param!.type;
+    final List metadata = param?.metadata ?? typeMirror.metadata;
     print("isNullable: ${type?.isNullable}");
     if (value.runtimeType == t) {
       return value;
@@ -130,20 +130,22 @@ class ConversionService {
         return [];
       }
 
-      final listTypeArgument =
-          typeMirror.typeArguments.firstOrNull?.reflectedType;
-      final listOfAnotation =
-          typeMirror.metadata.whereType<ListOf>().firstOrNull;
+      final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
       if (listOfAnotation == null) {
         throw Exception(
-            "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
+            "Field ${typeMirror.simpleName} of type ${typeMirror.reflectedType} in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
       }
-      if (listTypeArgument != dynamic) {
-        throw Exception(
-            "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} should have a type argument of dynamic and should be anotated with @ListOf(type) to ensure conversion");
+      try {
+        final listTypeArgument =
+            typeMirror.typeArguments.firstOrNull?.reflectedType;
+        if (listTypeArgument != dynamic) {
+          throw Exception(
+              "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} should have a type argument of dynamic and should be anotated with @ListOf(type) to ensure conversion");
+        }
+      } catch (e) {
+        print(e);
       }
 
-      print("Converting list $value to $listTypeArgument");
       final listEntries =
           value.map((e) => mapToObject(e, type: listOfAnotation.type)).toList();
       print("Set $listEntries for ${typeMirror.simpleName}");
