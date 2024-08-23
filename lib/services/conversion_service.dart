@@ -70,7 +70,7 @@ class ConversionService {
       (element) =>
           element is MethodMirror &&
           element.isConstructor &&
-          element.constructorName == "init",
+          element.constructorName == "",
     ) as MethodMirror;
     final MethodParameters methodParameters =
         MethodService().methodArgumentsByMap(
