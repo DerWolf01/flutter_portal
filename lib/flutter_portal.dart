@@ -51,7 +51,7 @@ class FlutterPortal {
   /// \param endPoint The endpoint to send the request to.
   /// \param params The query parameters for the request.
   /// \return A Future that resolves to the response converted to the specified type.
-  Future<PortalResult<ResponseWith>> get<ResponseWith>(String endPoint,
+  Future<PortalResult<ResponseWith>?> get<ResponseWith>(String endPoint,
       {String? host,
       Map<String, dynamic>? params,
       Map<String, String>? headers,
@@ -82,6 +82,7 @@ class FlutterPortal {
     } catch (e, s) {
       print(e);
       print(s);
+      return null;
     }
   }
 
