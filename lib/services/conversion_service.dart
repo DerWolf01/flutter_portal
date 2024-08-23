@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter_portal/list_of.dart';
 import 'package:flutter_portal/method_service.dart';
 import 'package:flutter_portal/reflection.dart';
 import 'package:flutter_portal/services/convertable.dart';
@@ -104,7 +105,7 @@ class ConversionService {
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, required value}) {
     final t = type?.reflectedType ?? T;
-
+    final typeMirror = convertable.reflectType(t);
     print(t);
     print("isNullable: ${type?.isNullable}");
     if (value.runtimeType == t) {
@@ -125,8 +126,28 @@ class ConversionService {
       }
       return convertPrimitive(value, t);
     } else if (value is List) {
-      print("isList: $value to map ");
-      return value.map((e) => mapToObject(e, type: t)).toList();
+      if (value.isEmpty) {
+        return [];
+      }
+
+      final listTypeArgument =
+          typeMirror.typeArguments.firstOrNull?.reflectedType;
+      final listOfAnotation =
+          typeMirror.metadata.whereType<ListOf>().firstOrNull;
+      if (listOfAnotation == null) {
+        throw Exception(
+            "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
+      }
+      if (listTypeArgument != dynamic) {
+        throw Exception(
+            "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} should have a type argument of dynamic and should be anotated with @ListOf(type) to ensure conversion");
+      }
+
+      print("Converting list $value to $listTypeArgument");
+      final listEntries =
+          value.map((e) => mapToObject(e, type: listOfAnotation.type)).toList();
+      print("Set $listEntries for ${typeMirror.simpleName}");
+      return listEntries;
     }
     print("is${value.runtimeType}: $value from Map to ${type?.reflectedType} ");
 
