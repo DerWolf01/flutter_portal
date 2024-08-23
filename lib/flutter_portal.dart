@@ -56,28 +56,33 @@ class FlutterPortal {
       Map<String, dynamic>? params,
       Map<String, String>? headers,
       Scheme? scheme}) async {
-    final useScheme = scheme ?? this.scheme;
-    final useHost = host ?? this.host;
-    if (useHost == null || useHost.isEmpty) {
-      throw Exception('Host not specified in FlutterPortal or method call');
-    }
-    var response = await http.get(
-        Uri(
-            host: useHost,
-            port: port,
-            path: endPoint,
-            queryParameters: params,
-            scheme: useScheme.name),
-        headers: headers);
-    if (response.statusCode < 200 || response.statusCode > 300) {
-      throw PortalException(response.statusCode, response.body);
-    }
+    try {
+      final useScheme = scheme ?? this.scheme;
+      final useHost = host ?? this.host;
+      if (useHost == null || useHost.isEmpty) {
+        throw Exception('Host not specified in FlutterPortal or method call');
+      }
+      var response = await http.get(
+          Uri(
+              host: useHost,
+              port: port,
+              path: endPoint,
+              queryParameters: params,
+              scheme: useScheme.name),
+          headers: headers);
+      if (response.statusCode < 200 || response.statusCode > 300) {
+        throw PortalException(response.statusCode, response.body);
+      }
 
-    return PortalResult(
-        response.statusCode,
-        ConversionService.primitiveStructureToObject<ResponseWith>(
-            value: jsonDecode(response.body),
-            type: convertable.reflectType(ResponseWith)));
+      return PortalResult(
+          response.statusCode,
+          ConversionService.primitiveStructureToObject<ResponseWith>(
+              value: jsonDecode(response.body),
+              type: convertable.reflectType(ResponseWith)));
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
   }
 
   /// Sends a POST request to the specified endpoint with the given data.
@@ -91,28 +96,33 @@ class FlutterPortal {
       Map<String, String>? headers,
       Map<String, dynamic>? queryParameters,
       Scheme? scheme}) async {
-    final useHost = host ?? this.host;
-    if (useHost == null || useHost.isEmpty) {
-      throw Exception('Host not specified in FlutterPortal or method call');
-    }
-    final useScheme = scheme ?? this.scheme;
-    var response = await http.post(
-        Uri(
-            host: useHost,
-            port: port,
-            path: endPoint,
-            scheme: useScheme.name,
-            queryParameters: queryParameters),
-        body: ConversionService.encodeJSON(data),
-        headers: headers);
-    if (response.statusCode < 200 || response.statusCode > 300) {
-      throw PortalException(response.statusCode, response.body);
-    }
+    try {
+      final useHost = host ?? this.host;
+      if (useHost == null || useHost.isEmpty) {
+        throw Exception('Host not specified in FlutterPortal or method call');
+      }
+      final useScheme = scheme ?? this.scheme;
+      var response = await http.post(
+          Uri(
+              host: useHost,
+              port: port,
+              path: endPoint,
+              scheme: useScheme.name,
+              queryParameters: queryParameters),
+          body: ConversionService.encodeJSON(data),
+          headers: headers);
+      if (response.statusCode < 200 || response.statusCode > 300) {
+        throw PortalException(response.statusCode, response.body);
+      }
 
-    return PortalResult(
-        response.statusCode,
-        ConversionService.primitiveStructureToObject<ResponseWith>(
-            value: jsonDecode(response.body)));
+      return PortalResult(
+          response.statusCode,
+          ConversionService.primitiveStructureToObject<ResponseWith>(
+              value: jsonDecode(response.body)));
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
   }
 }
 
