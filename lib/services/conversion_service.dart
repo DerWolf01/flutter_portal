@@ -103,9 +103,12 @@ class ConversionService {
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
   static dynamic primitiveStructureToObject<T>(
-      {TypeMirror? type, ParameterMirror? param, required value}) {
+      {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final t = (type ?? param?.type)?.reflectedType ?? T;
-    final typeMirror = type ?? param!.type;
+    final typeMirror = type ?? param?.type;
+    if (typeMirror == null) {
+      throw Exception("TypeMirror is null for $t and $value");
+    }
     final List metadata = param?.metadata ?? typeMirror.metadata;
     print("isNullable: ${type?.isNullable}");
     if (value.runtimeType == t) {
