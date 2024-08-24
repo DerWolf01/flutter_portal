@@ -104,6 +104,8 @@ class ConversionService {
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final Type? t = ((type ?? param?.type)?.reflectedType ?? (T));
+    print(
+        "---------------------------------- converting $value to $t ---------------------------------- ");
 
     if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
