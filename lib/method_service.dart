@@ -95,7 +95,7 @@ class MethodService {
 
       print(
           "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap contains($name) => ${argumentsMap.containsKey(name)}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-
+      print(argumentsMap.keys.contains(name));
       if (argumentsMap.containsKey(name)) {
         print('name $name ${argumentsMap[name]}');
         if (param.isNamed) {
