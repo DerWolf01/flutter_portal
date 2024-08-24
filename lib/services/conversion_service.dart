@@ -104,11 +104,11 @@ class ConversionService {
   /// \return An instance of type T.
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
-    final t = (type ?? param?.type)?.reflectedType ?? T;
-    final typeMirror = type ?? param?.type;
-    if (typeMirror == null) {
+    final t = ((type ?? param?.type)?.reflectedType ?? (T as T?) as Type?);
+    if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
     }
+    final typeMirror = convertable.reflectType(t);
     final List metadata = param?.metadata ?? typeMirror.metadata;
     print("isNullable: ${type?.isNullable}");
     if (value.runtimeType == t) {
