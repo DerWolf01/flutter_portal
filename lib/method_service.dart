@@ -60,8 +60,6 @@ class MethodService {
     List<dynamic> args = [];
     Map<String, dynamic> namedArgs = {};
 
-    print(
-        "++++++++++++++++++++++++++++++ Generating method arguments by map ++++++++++++++++++++++++++++++");
     for (final param in methodMirror.parameters) {
       final type = param.type.reflectedType;
       final name = param.simpleName;
@@ -70,8 +68,6 @@ class MethodService {
             (element) => element.checkAnotation(param) != null,
           )
           .firstOrNull;
-      print(
-          "++++++++++++++++++++++++++++++ parameter: $name:$type$param ++++++++++++++++++++++++++++++");
 
       if (anotation != null) {
         final anotationInstance = param.metadata
@@ -95,23 +91,18 @@ class MethodService {
 
       final containsKey = argumentsMap.keys.where(
             (element) {
-              print("$element == $name : ${element == name}");
               return element == name;
             },
           ).firstOrNull !=
           null;
 
-      print(
-          "++++++++++++++++++++++++++++++ containsKey:$containsKey ++++++++++++++++++++++++++++++");
       if (containsKey) {
-        print('name $name ${argumentsMap[name]}');
         if (param.isNamed) {
           namedArgs[name] = ConversionService.primitiveStructureToObject(
               param: param, value: argumentsMap[name]);
 
           continue;
         }
-        print("primitiveStructureToObjecting $type ${argumentsMap[name]}");
 
         args.add(ConversionService.primitiveStructureToObject(
             param: param, value: argumentsMap[name]));

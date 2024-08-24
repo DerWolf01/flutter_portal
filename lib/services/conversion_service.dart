@@ -62,10 +62,9 @@ class ConversionService {
   /// \param type The type of the object to create (optional).
   /// \return An instance of type T.
   static T mapToObject<T>(Map<String, dynamic> map, {Type? type}) {
-    print("mapToObject for ${type ?? T}");
     final classMirror = convertable.reflectType(type ?? T);
     final decs = declarations(classMirror as ClassMirror);
-    print(decs);
+
     final constructor = classMirror.declarations.values.firstWhere(
       (element) =>
           element is MethodMirror &&
@@ -110,20 +109,17 @@ class ConversionService {
     }
     final typeMirror = convertable.reflectType(t);
     final List metadata = param?.metadata ?? typeMirror.metadata;
-    print("isNullable: ${type?.isNullable}");
+
     if (value.runtimeType == t) {
       return value;
     } else if (value == null && (type?.isNullable ?? false)) {
-      print("isNull");
       return null;
     } else if (t is File || t == File) {
-      print("isFile: $value to map ");
       final f = File("random.file");
       f.writeAsBytesSync(base64.decode(value));
 
       return f;
     } else if (isPrimitive(t)) {
-      print("isPrimitive: $value to map ");
       if (value.runtimeType == t) {
         return value;
       }
@@ -134,6 +130,7 @@ class ConversionService {
       }
 
       final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
+      print("listOfAnotation: $listOfAnotation");
       if (listOfAnotation == null) {
         throw Exception(
             "Field ${typeMirror.simpleName} of type ${typeMirror.reflectedType} in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
@@ -145,8 +142,9 @@ class ConversionService {
           throw Exception(
               "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} should have a type argument of dynamic and should be anotated with @ListOf(type) to ensure conversion");
         }
-      } catch (e) {
+      } catch (e, s) {
         print(e);
+        print(s);
       }
 
       final listEntries =
@@ -154,7 +152,6 @@ class ConversionService {
       print("Set $listEntries for ${typeMirror.simpleName}");
       return listEntries;
     }
-    print("is${value.runtimeType}: $value from Map to ${type?.reflectedType} ");
 
     return mapToObject(value, type: t);
   }
@@ -168,7 +165,7 @@ class ConversionService {
       return jsonEncode(object);
     }
     final map = objectToMap(object);
-    print("map: $map");
+
     late final String json;
 
     try {
