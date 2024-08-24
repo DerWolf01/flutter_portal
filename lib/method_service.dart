@@ -94,9 +94,9 @@ class MethodService {
       }
 
       print(
-          "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap contains($name) => ${argumentsMap.containsKey(name)}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-      print(argumentsMap.keys.contains(name));
-      if (argumentsMap.containsKey(name)) {
+          "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap argumentsMap.keys.contains(name) => ${argumentsMap.keys.contains(name)}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+      if (argumentsMap.keys.contains(name)) {
         print('name $name ${argumentsMap[name]}');
         if (param.isNamed) {
           namedArgs[name] = ConversionService.primitiveStructureToObject(
