@@ -112,7 +112,7 @@ class ConversionService {
     final List metadata = param?.metadata ?? typeMirror.metadata;
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
 
-    if (value.runtimeType == t) {
+    if (value.runtimeType == t && listOfAnotation != null) {
       return value;
     } else if (value == null && (type?.isNullable ?? false)) {
       return null;
