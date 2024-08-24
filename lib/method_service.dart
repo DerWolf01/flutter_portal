@@ -93,8 +93,13 @@ class MethodService {
         continue;
       }
 
-      print(
-          "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap argumentsMap.keys.contains(name) => ${argumentsMap.keys.contains(name)}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+      final containsKey = argumentsMap.keys.where(
+            (element) {
+              print("$element == $name : ${element == name}");
+              return element == name;
+            },
+          ).firstOrNull !=
+          null;
 
       if (argumentsMap.keys.contains(name)) {
         print('name $name ${argumentsMap[name]}');
