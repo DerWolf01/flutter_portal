@@ -114,33 +114,43 @@ class ConversionService {
     print(
         "List of anotation: $listOfAnotation<${listOfAnotation?.type}> for $t");
     if (value.runtimeType == t && listOfAnotation != null) {
+      print("value.runtimeType == t");
       return value;
     } else if (value == null && (type?.isNullable ?? false)) {
+      print("value == null && (type?.isNullable ?? false)");
+
       return null;
     } else if (t is File || t == File) {
+      print("t is File || t == File");
       final f = File("random.file");
       f.writeAsBytesSync(base64.decode(value));
 
       return f;
     } else if (isPrimitive(t) && listOfAnotation == null) {
+      print("isPrimitive(t) && listOfAnotation == null");
       if (value.runtimeType == t) {
         return value;
       }
       return convertPrimitive(value, t);
     } else if (value is List) {
+      print("value is List");
       if (value.isEmpty) {
+        print("value.isEmpty");
         return [];
       }
 
       print("listOfAnotation: $listOfAnotation");
       if (listOfAnotation == null) {
+        print("listOfAnotation == null");
         throw Exception(
             "Field ${typeMirror.simpleName} of type ${typeMirror.reflectedType} in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
       }
       try {
         final listTypeArgument =
             typeMirror.typeArguments.firstOrNull?.reflectedType;
+        print("listTypeArgument: $listTypeArgument");
         if (listTypeArgument != dynamic) {
+          print("listTypeArgument != dynamic");
           throw Exception(
               "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} should have a type argument of dynamic and should be anotated with @ListOf(type) to ensure conversion");
         }
