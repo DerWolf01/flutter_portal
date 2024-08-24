@@ -104,11 +104,13 @@ class ConversionService {
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final Type? t = ((type ?? param?.type)?.reflectedType ?? (T));
+
     if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
     }
     final typeMirror = convertable.reflectType(t);
     final List metadata = param?.metadata ?? typeMirror.metadata;
+    final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
 
     if (value.runtimeType == t) {
       return value;
@@ -119,7 +121,7 @@ class ConversionService {
       f.writeAsBytesSync(base64.decode(value));
 
       return f;
-    } else if (isPrimitive(t)) {
+    } else if (isPrimitive(t) && listOfAnotation == null) {
       if (value.runtimeType == t) {
         return value;
       }
@@ -129,7 +131,6 @@ class ConversionService {
         return [];
       }
 
-      final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
       print("listOfAnotation: $listOfAnotation");
       if (listOfAnotation == null) {
         throw Exception(
