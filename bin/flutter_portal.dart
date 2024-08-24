@@ -19,34 +19,40 @@ void main() async {
   //     )
   //     .firstOrNull
   //     ?.metadata);
-  print(ConversionService.mapToObject<UserChild>(
-      ConversionService.objectToMap(UserChild(
-    1,
-    "email",
-    "name",
-    "lastname",
-    "token",
-  ))));
+  print(ConversionService.mapToObject<UserProfile>(
+      ConversionService.objectToMap(UserProfile.named(
+          id: 1,
+          username: "username",
+          email: "email",
+          name: "name",
+          lastname: "lastname",
+          profilePicture: null))));
 }
 
 @convertable
-class User {
-  final int id;
-  final String email;
-  final String name;
-  final String lastname;
-  final String token;
-
-  User(
+class UserProfile {
+  UserProfile(
     this.id,
     this.email,
     this.name,
     this.lastname,
-    this.token,
+    this.username,
+    this.profilePicture,
   );
-}
+  UserProfile.named({
+    required this.id,
+    required this.username,
+    required this.email,
+    required this.name,
+    required this.lastname,
+    this.profilePicture,
+  });
+  final int id;
+  final String email;
+  final String name;
+  final String lastname;
+  final String username;
+  final File? profilePicture;
 
-@convertable
-class UserChild extends User {
-  UserChild(super.id, super.email, super.name, super.lastname, super.token);
+  String get fullName => "$name $lastname";
 }
