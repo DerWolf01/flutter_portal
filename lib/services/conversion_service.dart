@@ -111,7 +111,8 @@ class ConversionService {
     final typeMirror = convertable.reflectType(t);
     final List metadata = param?.metadata ?? typeMirror.metadata;
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
-    print("List of anotation: $listOfAnotation for $t");
+    print(
+        "List of anotation: $listOfAnotation<${listOfAnotation?.type}> for $t");
     if (value.runtimeType == t && listOfAnotation != null) {
       return value;
     } else if (value == null && (type?.isNullable ?? false)) {
