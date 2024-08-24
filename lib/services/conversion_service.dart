@@ -105,7 +105,7 @@ class ConversionService {
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final Type? t = ((type ?? param?.type)?.reflectedType ?? (T));
     print(
-        "---------------------------------- converting $value to $t ---------------------------------- ");
+        "---------------------------------- converting $value to $t (isNullabe: ${(type?.isNullable ?? false)}) ---------------------------------- ");
 
     if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
