@@ -60,7 +60,8 @@ class MethodService {
     List<dynamic> args = [];
     Map<String, dynamic> namedArgs = {};
 
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Generating method arguments by mapa ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print(
+        "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Generating method arguments by mapa ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     for (final param in methodMirror.parameters) {
       final type = param.type.reflectedType;
       final name = param.simpleName;
@@ -69,8 +70,8 @@ class MethodService {
             (element) => element.checkAnotation(param) != null,
           )
           .firstOrNull;
-      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ $name:$type$param ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
+      print(
+          "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ $name:$type$param ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
       if (anotation != null) {
         final anotationInstance = param.metadata
@@ -80,7 +81,6 @@ class MethodService {
                   anotation.anotationType,
             )
             .first;
-
 
         if (param.isNamed) {
           namedArgs[name] = anotation.generateValue(
@@ -93,7 +93,8 @@ class MethodService {
         continue;
       }
 
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap contains($name) => argumentsMap.containsKey(name)  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      print(
+          "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap contains($name) => ${argumentsMap.containsKey(name)}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
       if (argumentsMap.containsKey(name)) {
         print('name $name ${argumentsMap[name]}');
