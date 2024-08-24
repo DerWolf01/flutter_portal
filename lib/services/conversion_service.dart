@@ -113,7 +113,7 @@ class ConversionService {
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
     print(
         "List of anotation: $listOfAnotation<${listOfAnotation?.type}> for $t");
-    if (value.runtimeType == t && listOfAnotation != null) {
+    if (value.runtimeType == t && listOfAnotation == null) {
       print("value.runtimeType == t");
       return value;
     } else if (value == null && (type?.isNullable ?? false)) {
