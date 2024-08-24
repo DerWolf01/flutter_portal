@@ -4,7 +4,6 @@ import 'package:flutter_portal/list_of.dart';
 import 'package:reflectable/reflectable.dart';
 import './flutter_portal.reflectable.dart';
 
-typedef NullableString = String?;
 void main() async {
   initializeReflectable();
   // print((reflectClass(SignUpResult)
@@ -20,44 +19,34 @@ void main() async {
   //     )
   //     .firstOrNull
   //     ?.metadata);
-  print(ConversionService.mapToObject<SignUpResult>(
-      ConversionService.objectToMap(SignUpResult.init("", [
-    SignUpStrings.init("asd"),
-    SignUpStrings.init("asd"),
-    SignUpStrings.init("asd")
-  ]))));
+  print(ConversionService.mapToObject<UserChild>(
+      ConversionService.objectToMap(UserChild(
+    1,
+    "email",
+    "name",
+    "lastname",
+    "token",
+  ))));
 }
 
 @convertable
-class SignUpResult {
-  SignUpResult.init(this.token, @ListOf(type: SignUpStrings) this.list);
-  SignUpResult(this.token, @ListOf(type: SignUpStrings) this.list);
-
-  late final String token;
-
-  @ListOf(type: SignUpStrings)
-  late final List<dynamic> list;
-}
-
-@convertable
-class SignUpStrings {
-  SignUpStrings.init(this.value);
-  SignUpStrings(this.value);
-
-  late final String value;
-}
-
 class User {
-  User();
+  final int id;
+  final String email;
+  final String name;
+  final String lastname;
+  final String token;
 
-  User.init(this.name, this.file);
-
-  late final File file;
-  late final String name;
+  User(
+    this.id,
+    this.email,
+    this.name,
+    this.lastname,
+    this.token,
+  );
 }
 
-class SignUpForm {
-  SignUpForm.init(this.user);
-
-  late final User user;
+@convertable
+class UserChild extends User {
+  UserChild(super.id, super.email, super.name, super.lastname, super.token);
 }

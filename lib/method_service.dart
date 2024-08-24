@@ -59,6 +59,8 @@ class MethodService {
       OnParameterAnotations? onParameterAnotation}) {
     List<dynamic> args = [];
     Map<String, dynamic> namedArgs = {};
+
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Generating method arguments by mapa ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     for (final param in methodMirror.parameters) {
       final type = param.type.reflectedType;
       final name = param.simpleName;
@@ -67,7 +69,9 @@ class MethodService {
             (element) => element.checkAnotation(param) != null,
           )
           .firstOrNull;
-      print("anotation $anotation");
+      print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ $name:$type$param ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+
       if (anotation != null) {
         final anotationInstance = param.metadata
             .where(
@@ -77,18 +81,20 @@ class MethodService {
             )
             .first;
 
-        print("anotationInstance $anotationInstance");
+
         if (param.isNamed) {
-          print('anotation $anotation $name $argumentsMap[name]');
           namedArgs[name] = anotation.generateValue(
               name, argumentsMap[name], anotationInstance);
           continue;
         }
-        print('anotation $anotation $name ${argumentsMap[name]}');
+
         args.add(anotation.generateValue(
             name, argumentsMap[name], anotationInstance));
         continue;
       }
+
+    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Argumentsmap contains($name) => argumentsMap.containsKey(name)  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
       if (argumentsMap.containsKey(name)) {
         print('name $name ${argumentsMap[name]}');
         if (param.isNamed) {
