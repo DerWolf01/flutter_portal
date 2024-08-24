@@ -113,6 +113,8 @@ class ConversionService {
     final List metadata = param?.metadata ?? typeMirror.metadata;
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
 
+    print(
+        "---------------------- converting $value to $t ----------------------");
     if (value.runtimeType == t && listOfAnotation == null) {
       print("value.runtimeType == t");
       return value;
@@ -144,19 +146,6 @@ class ConversionService {
         print("listOfAnotation == null");
         throw Exception(
             "Field ${typeMirror.simpleName} of type ${typeMirror.reflectedType} in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
-      }
-      try {
-        final listTypeArgument =
-            typeMirror.typeArguments.firstOrNull?.reflectedType;
-        print("listTypeArgument: $listTypeArgument");
-        if (listTypeArgument != dynamic) {
-          print("listTypeArgument != dynamic");
-          throw Exception(
-              "Field ${typeMirror.simpleName} of type List<$listTypeArgument> in class ${typeMirror.reflectedType} should have a type argument of dynamic and should be anotated with @ListOf(type) to ensure conversion");
-        }
-      } catch (e, s) {
-        print(e);
-        print(s);
       }
 
       final listEntries =
