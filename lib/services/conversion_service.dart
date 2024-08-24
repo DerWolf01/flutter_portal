@@ -104,13 +104,13 @@ class ConversionService {
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final Type? t = ((type ?? param?.type)?.reflectedType ?? (T));
-    print(
-        "---------------------------------- converting $value to $t (isNullabe: ${(type?.isNullable ?? false)}) ---------------------------------- ");
-
     if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
     }
     final typeMirror = convertable.reflectType(t);
+    final nullable = param?.isOptional ?? typeMirror.isNullable;
+    print(
+        "---------------------------------- converting $value to $t (isNullabe: $nullable) ---------------------------------- ");
     final List metadata = param?.metadata ?? typeMirror.metadata;
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
     print(
@@ -118,8 +118,8 @@ class ConversionService {
     if (value.runtimeType == t && listOfAnotation == null) {
       print("value.runtimeType == t");
       return value;
-    } else if (value == null && (type?.isNullable ?? false)) {
-      print("value == null && (type?.isNullable ?? false)");
+    } else if (value == null && nullable) {
+      print("value == null && nullable");
 
       return null;
     } else if (t is File || t == File) {
