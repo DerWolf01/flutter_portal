@@ -57,6 +57,8 @@ class MethodService {
       {required MethodMirror methodMirror,
       required Map<String, dynamic> argumentsMap,
       OnParameterAnotations? onParameterAnotation}) {
+    print(
+        "initializing method arguments for ${methodMirror.simpleName} with data --> $argumentsMap");
     List<dynamic> args = [];
     Map<String, dynamic> namedArgs = {};
 
@@ -107,7 +109,7 @@ class MethodService {
         args.add(ConversionService.primitiveStructureToObject(
             param: param, value: argumentsMap[name]));
       } else {
-        if (ConversionService.isNullable(param.type.reflectedType)) {
+        if (ConversionService.isNullable(param.type)) {
           args.add(null);
           continue;
         } else {

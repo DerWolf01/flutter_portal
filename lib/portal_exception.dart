@@ -1,11 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter_portal/services/convertable.dart';
+import 'package:http/http.dart';
 
 @convertable
-class PortalException extends IOException {
+class PortalException extends ClientException {
   final int statusCode;
-  final String message;
 
-  PortalException(this.statusCode, this.message) : super();
+  PortalException(this.statusCode, super.message) : super();
+
+  @override
+  String toString() {
+    return 'PortalException: statusCode:$statusCode got messages: "$message"';
+  }
 }

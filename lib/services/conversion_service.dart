@@ -103,9 +103,29 @@ class ConversionService {
   ///
   /// \param body The JSON string to convert.
   /// \return An instance of type T.
+
+  static T? jsonToObject<T>(dynamic body) {
+    if (T == dynamic) {
+      return jsonDecode(body) as T;
+    }
+    if (T == String) {
+      return body as T;
+    } else if (T == int) {
+      return int.parse(body) as T;
+    } else if (T == double) {
+      return double.parse(body) as T;
+    } else if (T == bool) {
+      return (body == "true") as T;
+    }
+
+    return mapToObject<T>(jsonDecode(body));
+  }
+
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final Type? t = ((param?.type ?? type)?.reflectedType ?? (T));
+    print(
+        "---------------------- converting $value to $t ----------------------");
     if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
     }
@@ -115,8 +135,6 @@ class ConversionService {
     final List metadata = param?.metadata ?? typeMirror.metadata;
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
 
-    print(
-        "---------------------- converting $value to $t ----------------------");
     if (value.runtimeType == t && listOfAnotation == null) {
       print("value.runtimeType == t");
       return value;
@@ -135,7 +153,9 @@ class ConversionService {
       if (value.runtimeType == t) {
         return value;
       }
-      return convertPrimitive(value, t);
+      final result = convertPrimitive(value, t);
+      print("coverted to $result");
+      return result;
     } else if (value is List) {
       print("value is List");
       if (value.isEmpty) {
@@ -143,13 +163,13 @@ class ConversionService {
         return [];
       }
 
-      print("listOfAnotation: $listOfAnotation");
       if (listOfAnotation == null) {
         print("listOfAnotation == null");
         throw Exception(
             "Field ${typeMirror.simpleName} of type ${typeMirror.reflectedType} in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
       }
-
+      print("ListOf(${listOfAnotation?.type})");
+      print("setting $value to List<${listOfAnotation.type}>");
       final listEntries =
           value.map((e) => mapToObject(e, type: listOfAnotation.type)).toList();
       print("Set $listEntries for ${typeMirror.simpleName}");
@@ -181,6 +201,21 @@ class ConversionService {
   }
 
   static dynamic convertPrimitive(dynamic body, Type T) {
+    if (T == List<String>) {
+      return (body as List).map((e) => e.toString()).toList();
+    }
+    if (T == List<int>) {
+      return (body as List).map((e) => int.parse(e.toString())).toList();
+    }
+    if (T == List<double>) {
+      return (body as List).map((e) => double.parse(e.toString())).toList();
+    }
+    if (T == List<num>) {
+      return (body as List).map((e) => num.parse(e.toString())).toList();
+    }
+    if (T == List<bool>) {
+      return (body as List).map((e) => e == "true").toList();
+    }
     if (T == dynamic) {
       return jsonDecode(body);
     }
@@ -198,8 +233,8 @@ class ConversionService {
     }
   }
 
-  static bool isNullable(Type type) {
-    return type.toString().endsWith("?");
+  static bool isNullable(TypeMirror type) {
+    return type.isNullable;
   }
 
   static bool isPrimitive(dynamic object) => (object is String ||
