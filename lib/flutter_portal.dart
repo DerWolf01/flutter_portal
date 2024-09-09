@@ -81,6 +81,9 @@ class FlutterPortal {
               value: jsonDecode(response.body),
               type: convertable.reflectType(ResponseWith)));
     } catch (e, s) {
+      if (e is PortalException) {
+        rethrow;
+      }
       print(e);
       print(s);
       return null;
@@ -123,6 +126,9 @@ class FlutterPortal {
           ConversionService.primitiveStructureToObject<ResponseWith>(
               value: jsonDecode(response.body)));
     } catch (e, s) {
+      if (e is PortalException) {
+        rethrow;
+      }
       print(e);
       print(s);
     }
