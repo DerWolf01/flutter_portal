@@ -71,7 +71,8 @@ class FlutterPortal {
               scheme: useScheme.name),
           headers: headers);
       if (response.statusCode < 200 || response.statusCode > 300) {
-        throw PortalException(response.statusCode, response.body);
+        throw PortalException(
+            response.statusCode, response.body, response.reasonPhrase ?? "");
       }
 
       return PortalResult(
@@ -113,7 +114,8 @@ class FlutterPortal {
           body: ConversionService.encodeJSON(data),
           headers: headers);
       if (response.statusCode < 200 || response.statusCode > 300) {
-        throw PortalException(response.statusCode, response.body);
+        throw PortalException(
+            response.statusCode, response.body, response.reasonPhrase ?? "");
       }
 
       return PortalResult(
