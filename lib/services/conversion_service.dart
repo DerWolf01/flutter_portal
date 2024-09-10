@@ -76,8 +76,7 @@ class ConversionService {
       methodMirror: constructor,
       argumentsMap: map,
     );
-    print("creating instance of $classMirror with (${methodParameters.args})+"
-        "namedArgs: ${methodParameters.namedArgs}");
+
     Object instance = classMirror.newInstance(
         "",
         methodParameters.args,
@@ -124,8 +123,7 @@ class ConversionService {
   static dynamic primitiveStructureToObject<T>(
       {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
     final Type? t = ((param?.type ?? type)?.reflectedType ?? (T));
-    print(
-        "---------------------- converting $value to $t ----------------------");
+
     if (t == null) {
       throw Exception("TypeMirror is null for $t and $value");
     }
@@ -136,43 +134,34 @@ class ConversionService {
     final listOfAnotation = metadata.whereType<ListOf>().firstOrNull;
 
     if (value.runtimeType == t && listOfAnotation == null) {
-      print("value.runtimeType == t");
       return value;
     } else if (value == null && nullable) {
-      print("value == null && nullable");
-
       return null;
     } else if (t is File || t == File) {
-      print("t is File || t == File");
       final f = File("random.file");
       f.writeAsBytesSync(base64.decode(value));
 
       return f;
     } else if (isPrimitive(t) && listOfAnotation == null) {
-      print("isPrimitive(t) && listOfAnotation == null");
       if (value.runtimeType == t) {
         return value;
       }
       final result = convertPrimitive(value, t);
-      print("coverted to $result");
+
       return result;
     } else if (value is List) {
-      print("value is List");
       if (value.isEmpty) {
-        print("value.isEmpty");
         return [];
       }
 
       if (listOfAnotation == null) {
-        print("listOfAnotation == null");
         throw Exception(
             "Field ${typeMirror.simpleName} of type ${typeMirror.reflectedType} in class ${typeMirror.reflectedType} has to be anotated with @ListOf(type) to ensure conversion");
       }
-      print("ListOf(${listOfAnotation?.type})");
-      print("setting $value to List<${listOfAnotation.type}>");
+
       final listEntries =
           value.map((e) => mapToObject(e, type: listOfAnotation.type)).toList();
-      print("Set $listEntries for ${typeMirror.simpleName}");
+
       return listEntries;
     }
 

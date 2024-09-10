@@ -57,8 +57,6 @@ class MethodService {
       {required MethodMirror methodMirror,
       required Map<String, dynamic> argumentsMap,
       OnParameterAnotations? onParameterAnotation}) {
-    print(
-        "initializing method arguments for ${methodMirror.simpleName} with data --> $argumentsMap");
     List<dynamic> args = [];
     Map<String, dynamic> namedArgs = {};
 
