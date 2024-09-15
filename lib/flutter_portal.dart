@@ -1,28 +1,36 @@
 import 'dart:convert';
+
 import 'package:flutter_portal/portal_exception.dart';
 import 'package:flutter_portal/portal_result.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
 import 'package:flutter_portal/services/convertable.dart';
 import 'package:http/http.dart' as http;
+
+export 'package:flutter_portal/method_service.dart';
 export 'package:flutter_portal/portal_exception.dart';
 export 'package:flutter_portal/portal_result.dart';
+export 'package:flutter_portal/reflection.dart';
 export 'package:flutter_portal/services/conversion_service.dart';
 export 'package:flutter_portal/services/convertable.dart';
-export 'package:flutter_portal/method_service.dart';
-export 'package:flutter_portal/reflection.dart';
 
 /// Singleton class to manage HTTP requests to a specified host and port.
 FlutterPortal get flutterPortal => FlutterPortal();
 
 class FlutterPortal {
+  static FlutterPortal? _instance;
   final String? host;
   final int? port;
   final Scheme scheme;
-  static FlutterPortal? _instance;
 
-  /// Private constructor for internal use.
-  FlutterPortal._internal({this.host, this.port, Scheme? scheme})
-      : scheme = scheme ?? Scheme.http;
+  /// Factory constructor to get the singleton instance.
+  ///
+  /// Throws an exception if the instance is not initialized.
+  factory FlutterPortal() {
+    if (_instance == null) {
+      throw Exception('FlutterPortal not initialized');
+    }
+    return _instance!;
+  }
 
   /// Factory constructor to initialize the singleton instance.
   ///
@@ -36,15 +44,9 @@ class FlutterPortal {
     return _instance!;
   }
 
-  /// Factory constructor to get the singleton instance.
-  ///
-  /// Throws an exception if the instance is not initialized.
-  factory FlutterPortal() {
-    if (_instance == null) {
-      throw Exception('FlutterPortal not initialized');
-    }
-    return _instance!;
-  }
+  /// Private constructor for internal use.
+  FlutterPortal._internal({this.host, this.port, Scheme? scheme})
+      : scheme = scheme ?? Scheme.http;
 
   /// Sends a GET request to the specified endpoint with the given parameters.
   ///
@@ -62,14 +64,15 @@ class FlutterPortal {
       if (useHost == null || useHost.isEmpty) {
         throw Exception('Host not specified in FlutterPortal or method call');
       }
-      var response = await http.get(
-          Uri(
-              host: useHost,
-              port: port,
-              path: endPoint,
-              queryParameters: params,
-              scheme: useScheme.name),
-          headers: headers);
+      final uri = Uri(
+          host: useHost,
+          port: port,
+          path: endPoint,
+          queryParameters: params,
+          scheme: useScheme.name);
+
+      print(uri);
+      var response = await http.get(uri, headers: headers);
       if (response.statusCode < 200 || response.statusCode > 300) {
         throw PortalException(
             response.statusCode, response.body, response.reasonPhrase ?? "");
@@ -107,6 +110,8 @@ class FlutterPortal {
         throw Exception('Host not specified in FlutterPortal or method call');
       }
       final useScheme = scheme ?? this.scheme;
+      final json = ConversionService.encodeJSON(data);
+      print("sending json: $json");
       var response = await http.post(
           Uri(
               host: useHost,
@@ -114,7 +119,7 @@ class FlutterPortal {
               path: endPoint,
               scheme: useScheme.name,
               queryParameters: queryParameters),
-          body: ConversionService.encodeJSON(data),
+          body: json,
           headers: headers);
       if (response.statusCode < 200 || response.statusCode > 300) {
         throw PortalException(
@@ -132,6 +137,7 @@ class FlutterPortal {
       print(e);
       print(s);
     }
+    return null;
   }
 }
 

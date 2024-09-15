@@ -4,11 +4,10 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_portal/list_of.dart';
 import 'package:reflectable/reflectable.dart';
 import './flutter_portal.reflectable.dart';
-import './jobs.dart';
 
 void main() async {
   initializeReflectable();
-  FlutterPortal.init(host: "localhost", port: 3000);
+  FlutterPortal.init(host: "watcher-test.de", scheme: Scheme.https);
   // print((reflectClass(SignUpResult)
   //         .declarations
   //         .values
@@ -23,8 +22,7 @@ void main() async {
   //     .firstOrNull
   //     ?.metadata);
   try {
-    print(await flutterPortal.get<JobsListsWithUserProfile>("/job/all",
-        headers: {"Authorization": ""}));
+    print(await flutterPortal.post("/e/marketplace-closure", {}));
   } catch (e, s) {
     print(e);
     print(s);
