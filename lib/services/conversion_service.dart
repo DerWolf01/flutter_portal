@@ -201,7 +201,7 @@ class ConversionService {
       return null;
     } else if (t is File || t == File) {
       final f = File("random.file");
-      f.writeAsBytesSync(value);
+      f.writeAsBytesSync(value.whereType<int>().toList());
 
       return f;
     } else if (isPrimitive(t) && listOfAnotation == null) {
