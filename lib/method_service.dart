@@ -2,19 +2,25 @@ import 'dart:async';
 
 import 'package:flutter_portal/reflection.dart';
 import 'package:flutter_portal/services/conversion_service.dart';
-import 'package:flutter_portal/services/convertable.dart';
 import 'package:reflectable/reflectable.dart';
-
-typedef OnParameterAnotations = List<OnParameterAnotation>;
 
 MethodService get methodService => MethodService();
 
-class MethodService {
-  MethodService._();
+typedef OnParameterAnotations = List<OnParameterAnotation>;
 
+class MethodParameters {
+  final List<dynamic> args;
+  final Map<String, dynamic> namedArgs;
+
+  MethodParameters(this.args, this.namedArgs);
+}
+
+class MethodService {
   static MethodService? _instance;
 
   factory MethodService() => (_instance ??= MethodService._());
+
+  MethodService._();
 
   Object? invoke(
       {required InstanceMirror holderMirror,
@@ -61,7 +67,6 @@ class MethodService {
     Map<String, dynamic> namedArgs = {};
 
     for (final param in methodMirror.parameters) {
-      final type = param.type.reflectedType;
       final name = param.simpleName;
       final anotation = onParameterAnotation
           ?.where(
@@ -119,19 +124,12 @@ class MethodService {
   }
 }
 
-class MethodParameters {
-  final List<dynamic> args;
-  final Map<String, dynamic> namedArgs;
-
-  MethodParameters(this.args, this.namedArgs);
-}
-
 class OnParameterAnotation<AnotationType> {
-  const OnParameterAnotation(this.generateValue);
-
-  Type get anotationType => AnotationType;
   final dynamic Function(String key, dynamic value, dynamic anotation)
       generateValue;
+
+  const OnParameterAnotation(this.generateValue);
+  Type get anotationType => AnotationType;
   AnotationType? checkAnotation(ParameterMirror parameterMirror) {
     return parameterMirror.metadata.where((element) {
       final elemenetType = reflect(element).type;

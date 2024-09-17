@@ -67,7 +67,7 @@ class ConversionService {
     if (isPrimitive(object)) {
       return jsonEncode(object);
     }
-    final map = objectToMap(object);
+    final map = objectToMap(object, json: true);
 
     late final String json;
 
@@ -160,7 +160,7 @@ class ConversionService {
   ///
   /// \param object The object to convert.
   /// \return A map representation of the object.
-  static Map<String, dynamic> objectToMap(dynamic object) {
+  static Map<String, dynamic> objectToMap(dynamic object, {bool json = false}) {
     var mirror = reflect(object);
     var classMirror = mirror.type;
 
@@ -173,21 +173,35 @@ class ConversionService {
         var fieldValue = mirror.invokeGetter(name);
         if (isPrimitive(fieldValue)) {
           map[name] = fieldValue;
+          continue;
         } else if (fieldValue is List) {
           map[name] = fieldValue.map((e) => objectToMap(e)).toList();
+          continue;
+        } else if (fieldValue is DateTime) {
+          if (json) {
+            map[name] = fieldValue.toIso8601String();
+            continue;
+          } else {
+            map[name] = fieldValue;
+            continue;
+          }
         } else if (fieldValue is File) {
           map[name] = fieldValue.readAsBytesSync().toList();
-        } else {
-          map[name] = objectToMap(fieldValue);
+          continue;
         }
+        map[name] = objectToMap(fieldValue);
+        continue;
       }
     }
 
     return map;
   }
 
-  static dynamic primitiveStructureToObject<T>(
-      {TypeMirror? type, ParameterMirror? param, required dynamic value}) {
+  static dynamic primitiveStructureToObject<T>({
+    TypeMirror? type,
+    ParameterMirror? param,
+    required dynamic value,
+  }) {
     final Type t = ((param?.type ?? type)?.reflectedType ?? (T));
     print("converting $value to $t");
     final typeMirror = param?.type ?? type ?? convertable.reflectType(T);
@@ -200,6 +214,16 @@ class ConversionService {
       return value;
     } else if (value == null && nullable) {
       return null;
+    } else if (t == DateTime || t is DateTime) {
+      if (value is DateTime) {
+        return value;
+      } else if (value is String) {
+        return DateTime.parse(value);
+      } else if (value is int) {
+        return DateTime.fromMillisecondsSinceEpoch(value);
+      } else {
+        throw Exception("Invalid date format $value: ${value.runtimeType}");
+      }
     } else if (t is File || t == File) {
       final f = File("random.file");
       f.writeAsBytesSync(value.whereType<int>().toList());
