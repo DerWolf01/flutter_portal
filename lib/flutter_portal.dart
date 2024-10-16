@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_portal/portal_exception.dart';
 import 'package:flutter_portal/portal_result.dart';
@@ -53,6 +54,7 @@ class FlutterPortal {
   /// \param endPoint The endpoint to send the request to.
   /// \param params The query parameters for the request.
   /// \return A Future that resolves to the response converted to the specified type.
+  /// The standard content type is application/json.
   Future<PortalResult<ResponseWith>?> get<ResponseWith>(String endPoint,
       {String? host,
       Map<String, dynamic>? params,
@@ -72,7 +74,11 @@ class FlutterPortal {
           scheme: useScheme.name);
 
       print(uri);
-      var response = await http.get(uri, headers: headers);
+      final headers0 = headers ?? {};
+      if (headers0['Content-Type'] == null) {
+        headers0['Content-Type'] = ContentType.json.mimeType;
+      }
+      var response = await http.get(uri, headers: headers0);
       if (response.statusCode < 200 || response.statusCode > 300) {
         throw PortalException(
             response.statusCode, response.body, response.reasonPhrase ?? "");
@@ -98,6 +104,7 @@ class FlutterPortal {
   /// \param endPoint The endpoint to send the request to.
   /// \param data The data to include in the request body.
   /// \return A Future that resolves to the response converted to the specified type.
+  /// The standard content type is application/json.
   Future<PortalResult<ResponseWith>?> post<ResponseWith>(
       String endPoint, dynamic data,
       {String? host,
@@ -112,6 +119,10 @@ class FlutterPortal {
       final useScheme = scheme ?? this.scheme;
       final json = ConversionService.encodeJSON(data);
       print("sending json: $json");
+      final headers0 = headers ?? {};
+      if (headers0['Content-Type'] == null) {
+        headers0['Content-Type'] = ContentType.json.mimeType;
+      }
       var response = await http.post(
           Uri(
               host: useHost,
@@ -120,7 +131,7 @@ class FlutterPortal {
               scheme: useScheme.name,
               queryParameters: queryParameters),
           body: json,
-          headers: headers);
+          headers: headers0);
       if (response.statusCode < 200 || response.statusCode > 300) {
         throw PortalException(
             response.statusCode, response.body, response.reasonPhrase ?? "");
